@@ -40,15 +40,22 @@ file on different branches, that stops being true.
 
 ## Daily work
 
-### Pick up the latest
+### Pick up a fix from `main`
+
+Do **not** merge `main` into your branch. `main` holds a full release with all
+three services in it, so merging would pull the other components onto your
+branch and break the separation. Cherry-pick the one commit you need:
 
 ```bash
 git fetch origin
-git switch <your-branch>
-git merge origin/main
+git log --oneline origin/main ^ai     # commits on main you do not have
+git cherry-pick <sha>
+git push
 ```
 
-Do this at the start of each day. It keeps the final `integration` merge easy.
+Cross-service changes go to Yashwanth and travel the full pipeline.
+
+Start the day with `git fetch origin` so you can see what has landed.
 
 ### Add a change
 
