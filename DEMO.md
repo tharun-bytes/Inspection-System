@@ -116,9 +116,10 @@ failure we do not paper over, because losing an inspection silently is worse
 than refusing it.
 
 **How do you know the branches helped?**
-Each developer owns one directory, so the three component branches touched
-disjoint paths and the `integration` merge completed with zero conflicts. The
-merge graph in `git log --graph --oneline --all` shows the staged flow.
+The three component branches touched disjoint paths, so the `integration` merge
+completed with zero conflicts. Upasana and Ramya share the `backend` branch but
+split it by file, so they never collided either. The merge graph in
+`git log --graph --oneline --all` shows the staged flow.
 
 ## If something breaks
 

@@ -1,6 +1,6 @@
 # Frontend
 
-React + Vite dashboard for the Inspection System. Owner: **Frontend developer**.
+React + Vite dashboard for the Inspection System. Owner: **Tharun**.
 
 ## Run locally
 

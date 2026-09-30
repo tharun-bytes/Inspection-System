@@ -75,12 +75,13 @@ The AI service must be up before the backend, or the backend will report
 ## Repository layout
 
 ```
-ai/           severity model + prediction service   (AI developer)
-backend/      inspection record API                 (backend developer)
-frontend/     React dashboard                       (frontend developer)
-integration/  docker-compose, e2e suite, contracts  (integration developer)
+ai/           severity model + prediction service   (Preethi)
+backend/      inspection record API                 (Upasana, Ramya)
+frontend/     React dashboard                       (Tharun)
+integration/  docker-compose, e2e suite, contracts  (Yashwanth)
 docs/         architecture, workflow, test plan
 CONTRIBUTING.md   team roles, branch rules, merge order
+DEMO.md           the presentation runbook
 ```
 
 Each service has its own README with the detail.

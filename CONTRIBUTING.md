@@ -5,35 +5,46 @@ you own.
 
 ## Team
 
-| Role                      | Owns         | Branch(es)                    | GitHub handle |
-| ------------------------- | ------------ | ----------------------------- | ------------- |
-| AI developer              | `ai/`        | `ai`                          | _TBD_         |
-| Backend developer         | `backend/`   | `backend`                     | _TBD_         |
-| Frontend developer        | `frontend/`  | `frontend`                    | _TBD_         |
-| Integration developer     | `integration/`, CI, releases | `integration`, `demo`, `main` | _TBD_         |
-| Test engineer             | test plans, e2e coverage | `testing`             | _TBD_         |
+| # | Person    | Role                              | Owns                                                                                       | Branch(es)                                | GitHub handle |
+| - | --------- | --------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------- | ------------- |
+| 1 | Tharun    | Frontend                          | `frontend/`                                                                                | `frontend`                                | tharun        |
+| 2 | Upasana   | Backend API                       | `backend/app/routers/inspections.py`, `backend/app/schemas.py`, `backend/app/ai_client.py`  | `backend`                                 | upasana       |
+| 3 | Preethi   | AI model / prediction             | `ai/`                                                                                      | `ai`                                      | preethi       |
+| 4 | Ramya     | Database + history                | `backend/app/models.py`, `backend/app/database.py`, `backend/app/config.py`, `backend/app/routers/history.py` | `backend`                      | ramya         |
+| 5 | Yashwanth | Integration + GitHub + final testing | `integration/`, `.github/`, `docs/TEST_PLAN.md`, `DEMO.md`                                | `integration`, `testing`, `demo`, `main`  | yashwanth     |
 
-> Fill in the handles before your first PR so reviewers know who to ask.
+Handles are assumed to match these names. Correct them in this table if not —
+reviewers use it to know who to ask.
+
+> Upasana and Ramya are both on the `backend` branch. That is deliberate: they
+> share a branch but never share a file. See below.
 
 ## The one rule that prevents most conflicts
 
-**Only edit files inside the directory you own.** If a change needs a
-cross-service edit, it belongs to the integration developer.
+**Only edit files listed against your name above.** If a change needs a file
+owned by someone else, that is a conversation, not an edit.
 
-The three component branches touch disjoint paths, so merging them into
-`integration` is essentially conflict-free. The moment two people edit the same
-file on different branches, that stops being true.
+The three component branches still touch disjoint paths, so merging them into
+`integration` stays conflict-free. Two people editing the same file on *different*
+branches is what breaks that — and Upasana and Ramya avoid it by sharing a branch
+instead of inventing a fourth one.
+
+### The one file both backend people need
+
+`backend/app/main.py` registers every router, so it is shared. Whoever adds a new
+router edits it once, in a small standalone PR, and says so in the description.
+Do not bundle it with unrelated work.
 
 ## Branches
 
 | Branch        | Who commits here        | Merges into                     |
 | ------------- | ----------------------- | ------------------------------- |
-| `ai`          | AI developer            | `integration`                   |
-| `backend`     | Backend developer       | `integration`                   |
-| `frontend`    | Frontend developer      | `integration`                   |
-| `integration` | Integration developer   | `testing`                       |
-| `testing`     | Test engineer           | `demo`                          |
-| `demo`        | Integration developer   | `main`                          |
+| `ai`          | Preethi                | `integration`                   |
+| `backend`     | Upasana, Ramya          | `integration`                   |
+| `frontend`    | Tharun                 | `integration`                   |
+| `integration` | Yashwanth              | `testing`                       |
+| `testing`     | Yashwanth              | `demo`                          |
+| `demo`        | Yashwanth              | `main`                          |
 | `main`        | nobody commits directly | —                               |
 
 `main` is the demo release. It is protected: no direct pushes, two approvals.
@@ -105,7 +116,8 @@ cd frontend && npm run lint && npm test && npm run build
 
 Then check:
 
-- [ ] Files changed only inside your directory
+- [ ] Files changed only in files you own
+- [ ] If you touched `backend/app/main.py`, the PR does nothing else
 - [ ] Tests added or updated
 - [ ] No `.env`, `*.db`, `node_modules/`, `.venv/` or `*.joblib` in the diff
 - [ ] CI is green
@@ -120,9 +132,9 @@ it. Do not try to land that in one component's PR.
 Instead:
 
 1. Raise an issue describing the new contract.
-2. The integration developer coordinates the change across the branches, or
-   splits it into a sequence of backward-compatible PRs (add the new field,
-   switch the consumers, then remove the old one).
+2. Yashwanth coordinates the change across the branches, or splits it into a
+   sequence of backward-compatible PRs (add the new field, switch the consumers,
+   then remove the old one).
 3. Re-run `integration/tests` before merging to `testing`.
 
 The contract between the services is written down in

@@ -25,32 +25,34 @@ and the order things are allowed to merge.
 
 | Branch       | Owner                    | Contains                              |
 | ------------ | ------------------------ | ------------------------------------- |
-| `ai`         | AI developer             | `ai/`                                 |
-| `backend`    | Backend developer        | `backend/`                            |
-| `frontend`   | Frontend developer       | `frontend/`                           |
-| `integration`| Integration developer    | `integration/` + everything merged in  |
-| `testing`    | Test engineer            | End-to-end tests, test plan            |
-| `demo`       | Integration developer    | Release candidate, demo rehearsal     |
-| `main`       | Integration developer    | What the demo actually runs           |
+| `ai`         | Preethi                  | `ai/`                                 |
+| `backend`    | Upasana, Ramya           | `backend/` — API layer and data layer  |
+| `frontend`   | Tharun                   | `frontend/`                           |
+| `integration`| Yashwanth                | `integration/` + everything merged in  |
+| `testing`    | Yashwanth                | End-to-end tests, test plan            |
+| `demo`       | Yashwanth                | Release candidate, demo rehearsal     |
+| `main`       | Yashwanth (releases only)| What the demo actually runs           |
 
-Each developer owns exactly one directory, so the three component branches touch
-disjoint paths and merging them into `integration` is essentially conflict-free.
+The three component branches still touch disjoint paths, so merging them into
+`integration` is essentially conflict-free. Upasana and Ramya share `backend` but
+split it by file — Upasana takes the API layer, Ramya the data layer — so they
+never collide. The file-by-file split is in `CONTRIBUTING.md`.
 
 ## The flow, in order
 
-1. **Component work** — the AI, backend and frontend developers work in
-   parallel on their own branch. Short-lived feature branches off their component
-   branch, or commits straight to it for small changes. Never edit another
-   component's directory.
+1. **Component work** — Preethi, Upasana, Ramya and Tharun work in parallel on
+   `ai`, `backend` and `frontend`. Short-lived feature branches off their
+   component branch, or commits straight to it for small changes. Never edit a
+   file another person owns.
 
 2. **Merge into `integration`** — once a component is demonstrable, its branch is
    merged into `integration`. This is the first time the three parts meet. Run
    `docker compose up` and the e2e suite locally before merging.
 
-3. **Merge `integration` into `testing`** — the test engineer runs the full
-   suite, works through `docs/TEST_PLAN.md`, and adds regression tests for
-   anything that breaks. Fixes go back to the owning component's branch and
-   travel the same path again.
+3. **Merge `integration` into `testing`** — Yashwanth runs the full suite, works
+   through `docs/TEST_PLAN.md`, and adds regression tests for anything that
+   breaks. Fixes go back to the owning component's branch and travel the same
+   path again.
 
 4. **Merge `testing` into `demo`** — the release candidate. Rehearse the demo
    end to end on this branch. Only bug fixes at this point, and each one has to
@@ -76,8 +78,9 @@ painful for everyone.
 
 ## Ground rules
 
-- **One directory per developer.** If a change needs a cross-service edit, it
-  belongs to the integration developer.
+- **One owner per file.** The table at the top of `CONTRIBUTING.md` says who owns
+  what. If a change needs someone else's file, it belongs to Yashwanth to
+  coordinate.
 - **Never commit** `.env` files, `*.db`, `node_modules/`, `.venv/` or trained
   model artifacts. `.gitignore` already covers these — check before committing.
 - **CI must be green** before merge. Every PR runs lint and tests for the

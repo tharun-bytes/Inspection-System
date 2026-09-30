@@ -1,6 +1,6 @@
 # Integration
 
-Everything that spans more than one service. Owner: **Integration developer**.
+Everything that spans more than one service. Owner: **Yashwanth**.
 
 ## Run the whole stack with Docker
 

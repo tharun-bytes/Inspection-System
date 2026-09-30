@@ -1,7 +1,7 @@
 # AI Service
 
 Predicts defect severity (`minor` / `major` / `critical`) from inspection
-measurements. Owner: **AI developer**.
+measurements. Owner: **Preethi**.
 
 ## Run locally
 

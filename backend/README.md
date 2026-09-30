@@ -1,7 +1,16 @@
 # Backend API
 
-Owns inspection records and enriches them with AI severity verdicts. Owner:
-**Backend developer**.
+Owns inspection records and enriches them with AI severity verdicts.
+
+Two people share this service, split by file so they never collide:
+
+| Owner    | Files |
+| -------- | ----- |
+| Upasana  | `routers/inspections.py`, `schemas.py`, `ai_client.py` — the API layer |
+| Ramya    | `models.py`, `database.py`, `config.py`, `routers/history.py` — the data layer |
+
+`main.py` is shared: whoever adds a router edits it once, in a PR that does
+nothing else.
 
 ## Run locally
 

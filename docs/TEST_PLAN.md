@@ -1,6 +1,6 @@
 # Test plan
 
-Owner: **Test engineer**. Run against the `testing` branch.
+Owner: **Yashwanth**. Run against the `testing` branch.
 
 ## Before you start
 
