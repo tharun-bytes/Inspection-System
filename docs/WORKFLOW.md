@@ -82,24 +82,46 @@ painful for everyone.
   model artifacts. `.gitignore` already covers these — check before committing.
 - **CI must be green** before merge. Every PR runs lint and tests for the
   component it touches.
-- **Bring `main` down** onto your component branch regularly:
-  `git merge main` (or `git rebase main`) so you pick up fixes early.
+- **Never merge `main` into a component branch.** Cherry-pick the specific fix
+  you need instead — see below for why.
 - **Small commits with clear messages.** `backend: validate torque range on
   create`, not `fixes`.
 - **Two approvals to merge into `main`**, one elsewhere.
 
 ## Keeping a component branch current
 
-Each component branch starts from `main`. When `main` changes:
+**Do not merge `main` into a component branch.** `main` is a full release — it
+contains all three services. Merging it into `ai` would drag `backend/` and
+`frontend/` onto the `ai` branch, and the disjoint-directory setup that keeps
+the `integration` merge conflict-free would be gone. This is the single easiest
+way to wreck the branch structure.
+
+Component branches only ever move *forward*, through `integration`:
+
+```
+ai  ─┐
+backend  ─┼─>  integration  ->  testing  ->  demo  ->  main
+frontend  ─┘
+```
+
+When a fix lands on `main` and you need it on your branch, take just that commit:
 
 ```bash
 git switch ai
-git merge main
+git fetch origin
+git log --oneline origin/main ^ai          # find the fix
+git cherry-pick <sha>
 git push
 ```
 
-Repeat for `backend` and `frontend`. Doing this weekly keeps the final
-`integration` merge trivial.
+If the fix is cross-service, it goes through Yashwanth and travels the normal
+path. That is the whole reason the pipeline exists.
+
+To see how far a component branch has drifted from the release:
+
+```bash
+git log --oneline origin/main ^ai
+```
 
 ## Recovering from a bad `main`
 
