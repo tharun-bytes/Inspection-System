@@ -14,36 +14,43 @@ and the order things are allowed to merge.
           |                 |                  |
       integration <---------+                  |
           |                                    |
-    +-----+-----+---------+                    |
-    |     |     |         |                    |
-    ai  backend frontend   |                    |
-    |     |     |         |                    |
-    +-----+-----+---------+                    |
+     +----+----+------+---------+              |
+     |    |    |      |         |              |
+     ai  backend-api backend-data frontend     |
+     |    |    |      |         |              |
+     +----+----+------+---------+              |
           |                                    |
-          +-------------------------------------+
+          +------------------------------------+
 ```
 
-| Branch       | Owner                    | Contains                              |
+| Branch        | Owner                    | Contains                              |
 | ------------ | ------------------------ | ------------------------------------- |
 | `ai`         | Preethi                  | `ai/`                                 |
-| `backend`    | Upasana, Ramya           | `backend/` — API layer and data layer  |
+| `backend-api`| Upasana                  | `backend/` — API layer                |
+| `backend-data`| Ramya                   | `backend/` — data layer               |
 | `frontend`   | Tharun                   | `frontend/`                           |
 | `integration`| Yashwanth                | `integration/` + everything merged in  |
 | `testing`    | Yashwanth                | End-to-end tests, test plan            |
 | `demo`       | Yashwanth                | Release candidate, demo rehearsal     |
 | `main`       | Yashwanth (releases only)| What the demo actually runs           |
 
-The three component branches still touch disjoint paths, so merging them into
-`integration` is essentially conflict-free. Upasana and Ramya share `backend` but
-split it by file — Upasana takes the API layer, Ramya the data layer — so they
-never collide. The file-by-file split is in `CONTRIBUTING.md`.
+Everyone edits a disjoint set of files, so merging the four component branches
+into `integration` is conflict-free. Git merges file by file, not folder by
+folder, so `backend-api` and `backend-data` both carrying `backend/` is fine —
+Upasana takes the API layer, Ramya the data layer, and they never touch the same
+file. The file-by-file split is in `CONTRIBUTING.md`.
+
+Each backend branch keeps the whole `backend/` directory so its owner can run the
+service and its test suite without waiting for the other to merge. Merge order
+between the two does not matter, because only one branch ever changes any given
+file.
 
 ## The flow, in order
 
 1. **Component work** — Preethi, Upasana, Ramya and Tharun work in parallel on
-   `ai`, `backend` and `frontend`. Short-lived feature branches off their
-   component branch, or commits straight to it for small changes. Never edit a
-   file another person owns.
+   `ai`, `backend-api`, `backend-data` and `frontend`. Short-lived feature
+   branches off their component branch, or commits straight to it for small
+   changes. Never edit a file another person owns.
 
 2. **Merge into `integration`** — once a component is demonstrable, its branch is
    merged into `integration`. This is the first time the three parts meet. Run
@@ -67,7 +74,7 @@ never collide. The file-by-file split is in `CONTRIBUTING.md`.
 
 ## Why the branches are set up this way
 
-Merging three active branches into `main` directly means conflicts land on
+Merging four active branches into `main` directly means conflicts land on
 whoever happens to be integrating that day, and a broken `main` is a broken demo.
 With the staged branches above, `main` only ever receives something that has
 already survived integration and testing.
@@ -99,20 +106,26 @@ contains all three services. Merging it into `ai` would drag `backend/` and
 the `integration` merge conflict-free would be gone. This is the single easiest
 way to wreck the branch structure.
 
+`backend-api` and `backend-data` are the one place this is easy to get wrong by
+accident: they are siblings, and merging one into the other looks harmless
+because the paths are identical. It is not — it silently collapses the split and
+both people end up on one branch. Cherry-pick instead.
+
 Component branches only ever move *forward*, through `integration`:
 
 ```
 ai  ─┐
-backend  ─┼─>  integration  ->  testing  ->  demo  ->  main
+backend-api  ─┼─>  integration  ->  testing  ->  demo  ->  main
+backend-data ─┤
 frontend  ─┘
 ```
 
 When a fix lands on `main` and you need it on your branch, take just that commit:
 
 ```bash
-git switch ai
+git switch backend-api
 git fetch origin
-git log --oneline origin/main ^ai          # find the fix
+git log --oneline origin/main ^backend-api   # find the fix
 git cherry-pick <sha>
 git push
 ```
@@ -123,7 +136,7 @@ path. That is the whole reason the pipeline exists.
 To see how far a component branch has drifted from the release:
 
 ```bash
-git log --oneline origin/main ^ai
+git log --oneline origin/main ^backend-api
 ```
 
 ## Recovering from a bad `main`

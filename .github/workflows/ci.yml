@@ -2,19 +2,21 @@ name: CI
 
 on:
   push:
-    branches: [main, ai, backend, frontend, integration, testing, demo]
+    branches: [main, ai, backend, backend-api, backend-data, frontend, integration, testing, demo]
   pull_request:
-    branches: [ai, backend, frontend, integration, testing, main]
+    branches: [ai, backend, backend-api, backend-data, frontend, integration, testing, main]
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# Each component branch only carries its own directory, so a job for a service
-# that is not on this branch detects that and reports success rather than
-# failing on a missing working directory. Every job still reports on every
-# branch, which is what lets the branch protection rules require these checks
-# by name without a PR hanging forever on a check that never runs.
+# The `backend` job runs on both `backend-api` and `backend-data`, because each
+# of those branches carries the whole `backend/` directory so its owner can run
+# and test the service in isolation. A job for a service that is not on the
+# branch at all detects that and reports success rather than failing on a
+# missing working directory. Every job still reports on every branch, which is
+# what lets the branch protection rules require these checks by name without a PR
+# hanging forever on a check that never runs.
 #
 # Note: `hashFiles()` is NOT available in a job-level `if`, only in a step-level
 # one, so detection happens in a step. Keep this file valid -- an invalid

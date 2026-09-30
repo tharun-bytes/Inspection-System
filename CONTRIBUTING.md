@@ -8,39 +8,50 @@ you own.
 | # | Person    | Role                              | Owns                                                                                       | Branch(es)                                | GitHub handle |
 | - | --------- | --------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------- | ------------- |
 | 1 | Tharun    | Frontend                          | `frontend/`                                                                                | `frontend`                                | tharun        |
-| 2 | Upasana   | Backend API                       | `backend/app/routers/inspections.py`, `backend/app/schemas.py`, `backend/app/ai_client.py`  | `backend`                                 | upasana       |
+| 2 | Upasana   | Backend API                       | `backend/app/routers/inspections.py`, `backend/app/schemas.py`, `backend/app/ai_client.py`  | `backend-api`                             | upasana       |
 | 3 | Preethi   | AI model / prediction             | `ai/`                                                                                      | `ai`                                      | preethi       |
-| 4 | Ramya     | Database + history                | `backend/app/models.py`, `backend/app/database.py`, `backend/app/config.py`, `backend/app/routers/history.py` | `backend`                      | ramya         |
-| 5 | Yashwanth | Integration + GitHub + final testing | `integration/`, `.github/`, `docs/TEST_PLAN.md`, `DEMO.md`                                | `integration`, `testing`, `demo`, `main`  | yashwanth     |
+| 4 | Ramya     | Database + history                | `backend/app/models.py`, `backend/app/database.py`, `backend/app/config.py`, `backend/app/routers/history.py` | `backend-data`              | ramya         |
+| 5 | Yashwanth | Integration + GitHub + final testing | `integration/`, `.github/`, `backend/app/main.py`, `backend/tests/conftest.py`, `docs/`, `DEMO.md` | `integration`, `testing`, `demo`, `main`  | yashwanth     |
 
 Handles are assumed to match these names. Correct them in this table if not —
 reviewers use it to know who to ask.
 
-> Upasana and Ramya are both on the `backend` branch. That is deliberate: they
-> share a branch but never share a file. See below.
+> Upasana and Ramya both work on the backend, on **separate branches** split by
+> layer: Upasana owns the API layer, Ramya the data layer. See below.
 
 ## The one rule that prevents most conflicts
 
 **Only edit files listed against your name above.** If a change needs a file
 owned by someone else, that is a conversation, not an edit.
 
-The three component branches still touch disjoint paths, so merging them into
-`integration` stays conflict-free. Two people editing the same file on *different*
-branches is what breaks that — and Upasana and Ramya avoid it by sharing a branch
-instead of inventing a fourth one.
+Everyone edits a disjoint set of files, so merging the four component branches
+into `integration` stays conflict-free. Git merges file by file, not folder by
+folder, so `backend-api` and `backend-data` both carrying `backend/` is fine —
+they simply never touch the same file inside it.
 
-### The one file both backend people need
+The two backend branches each keep the **whole** `backend/` directory, not just
+their own files. That is deliberate: it lets Upasana boot the backend and run
+its test suite on `backend-api`, and Ramya do the same on `backend-data`,
+without waiting for the other to merge. The copy of a file you do not own is
+there to keep the service runnable, not as an invitation to edit it. Git
+resolves the duplicated files silently on merge, because only one branch ever
+changes any given file, so merge order between the two does not matter.
 
-`backend/app/main.py` registers every router, so it is shared. Whoever adds a new
-router edits it once, in a small standalone PR, and says so in the description.
-Do not bundle it with unrelated work.
+### The two shared backend files
+
+`backend/app/main.py` (registers every router) and `backend/tests/conftest.py`
+(test fixtures) are both needed by Upasana and Ramya, so they are owned by
+Yashwanth. Do not edit either one. If you need a change in one of them, raise an
+issue describing it and it lands as a small standalone PR on `integration` —
+a few lines, applied by the owner, nothing bundled with it.
 
 ## Branches
 
 | Branch        | Who commits here        | Merges into                     |
 | ------------- | ----------------------- | ------------------------------- |
 | `ai`          | Preethi                | `integration`                   |
-| `backend`     | Upasana, Ramya          | `integration`                   |
+| `backend-api` | Upasana                | `integration`                   |
+| `backend-data`| Ramya                  | `integration`                   |
 | `frontend`    | Tharun                 | `integration`                   |
 | `integration` | Yashwanth              | `testing`                       |
 | `testing`     | Yashwanth              | `demo`                          |
@@ -59,7 +70,7 @@ branch and break the separation. Cherry-pick the one commit you need:
 
 ```bash
 git fetch origin
-git log --oneline origin/main ^ai     # commits on main you do not have
+git log --oneline origin/main ^backend-api    # commits on main you do not have
 git cherry-pick <sha>
 git push
 ```
@@ -74,16 +85,16 @@ For anything more than a small fix, use a short-lived feature branch off your
 own component branch:
 
 ```bash
-git switch backend
+git switch backend-api          # or backend-data, for Ramya
 git pull
-git switch -c backend/validate-notes-length
+git switch -c backend-api/validate-notes-length
 # ... work ...
-git add backend/
+git add backend/app/schemas.py   # stage only the files you own
 git commit -m "backend: cap notes length at 2000 characters"
-git push -u origin backend/validate-notes-length
+git push -u origin backend-api/validate-notes-length
 ```
 
-Open a PR into `backend` (not `main`), fill in the template, wait for CI.
+Open a PR into `backend-api` (not `main`), fill in the template, wait for CI.
 
 For small changes, commit straight to your component branch.
 
@@ -124,7 +135,8 @@ cd frontend && npm run lint && npm test && npm run build
 Then check:
 
 - [ ] Files changed only in files you own
-- [ ] If you touched `backend/app/main.py`, the PR does nothing else
+- [ ] `backend/app/main.py` and `backend/tests/conftest.py` untouched — if either
+      was needed, it is a separate request to Yashwanth
 - [ ] Tests added or updated
 - [ ] No `.env`, `*.db`, `node_modules/`, `.venv/` or `*.joblib` in the diff
 - [ ] CI is green
