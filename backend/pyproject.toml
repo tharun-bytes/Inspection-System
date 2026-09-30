@@ -1,0 +1,22 @@
+[project]
+name = "inspection-backend"
+version = "0.1.0"
+description = "Inspection record API with AI severity verdicts"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# FastAPI's documented style puts Depends()/Query() in argument defaults.
+"app/routers/*.py" = ["B008"]
+"app/main.py" = ["B008"]
